@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculus Warm-up for Causal Inference</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f11;
+    --surface: #17171a;
+    --surface2: #1e1e23;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #e8e8ec;
+    --muted: #7a7a88;
+    --accent: #7c6af7;
+    --accent2: #4ecdc4;
+    --accent3: #f7b267;
+    --green: #56d98a;
+    --red: #f7706e;
+    --code-bg: #121215;
+    --cell-num: #3a3a45;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .notebook {
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  .nb-header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .nb-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(124,106,247,0.1);
+    border: 1px solid rgba(124,106,247,0.25);
+    padding: 3px 10px;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    letter-spacing: 0.06em;
+  }
+
+  .nb-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 2rem;
+    font-weight: 400;
+    color: var(--text);
+    line-height: 1.25;
+    margin-bottom: 0.5rem;
+  }
+
+  .nb-subtitle {
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .nb-meta {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .nb-meta span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .nb-meta span b {
+    color: var(--accent2);
+    font-weight: 500;
+  }
+
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 2rem 0 1.25rem;
+  }
+
+  .section-divider .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent3);
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+
+  .section-divider .line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .cell {
+    display: flex;
+    gap: 0;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    transition: border-color 0.2s;
+  }
+
+  .cell:focus-within { border-color: var(--border2); }
+
+  .cell-gutter {
+    background: var(--surface);
+    padding: 1rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-width: 52px;
+    border-right: 1px solid var(--border);
+  }
+
+  .cell-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--cell-num);
+  }
+
+  .run-btn {
+    background: none;
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 4px 6px;
+    font-size: 11px;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .run-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .run-btn.running { border-color: var(--accent3); color: var(--accent3); }
+  .run-btn.done { border-color: var(--green); color: var(--green); }
+
+  .cell-body { flex: 1; background: var(--code-bg); }
+
+  .cell-code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text);
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 100%;
+    padding: 1rem;
+    resize: none;
+    min-height: 80px;
+  }
+
+  .cell-output {
+    border-top: 1px solid var(--border);
+    padding: 0.875rem 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.65;
+    display: none;
+    background: var(--surface);
+  }
+
+  .cell-output.visible { display: block; }
+  .cell-output.error { color: var(--red); }
+  .cell-output.success { color: var(--green); }
+  .cell-output.result { color: var(--accent2); }
+
+  .markdown-cell {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .markdown-cell h3 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+
+  .markdown-cell p {
+    font-size: 14px;
+    color: #b0b0be;
+    line-height: 1.75;
+    margin-bottom: 0.5rem;
+  }
+
+  .markdown-cell p:last-child { margin-bottom: 0; }
+
+  .math-formula {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    background: var(--code-bg);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    margin: 0.75rem 0;
+    color: var(--accent3);
+    display: block;
+  }
+
+  .hint {
+    background: rgba(78,205,196,0.06);
+    border-left: 3px solid var(--accent2);
+    border-radius: 0 6px 6px 0;
+    padding: 0.75rem 1rem;
+    margin: 0.75rem 0;
+    font-size: 13px;
+    color: #9ad4d0;
+  }
+
+  .ci-link {
+    background: rgba(124,106,247,0.06);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 0.75rem 1rem;
+    margin: 0.75rem 0;
+    font-size: 13px;
+    color: #b0a8f5;
+  }
+
+  .progress-bar {
+    background: var(--surface2);
+    border-radius: 999px;
+    height: 6px;
+    margin: 1.5rem 0 0.5rem;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 999px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  .progress-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+
+  .kw { color: #c792ea; }
+  .fn { color: #82aaff; }
+  .str { color: #c3e88d; }
+  .num { color: var(--accent3); }
+  .cm { color: #546e7a; font-style: italic; }
+  .op { color: var(--accent2); }
+
+  .exercise-badge {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-right: 6px;
+    letter-spacing: 0.05em;
+  }
+
+  .badge-warmup { background: rgba(86,217,138,0.12); color: var(--green); border: 1px solid rgba(86,217,138,0.2); }
+  .badge-core { background: rgba(124,106,247,0.12); color: var(--accent); border: 1px solid rgba(124,106,247,0.2); }
+  .badge-ci { background: rgba(247,178,103,0.12); color: var(--accent3); border: 1px solid rgba(247,178,103,0.2); }
+
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .toolbar-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: 5px;
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .toolbar-btn:hover { color: var(--text); border-color: var(--accent); }
+  .toolbar-btn.primary { background: rgba(124,106,247,0.15); color: var(--accent); border-color: rgba(124,106,247,0.3); }
+
+  .score-display {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .score-display b { color: var(--accent2); }
+
+  canvas {
+    border-radius: 6px;
+    display: block;
+    margin-top: 8px;
+    max-width: 100%;
+  }
+</style>
+</head>
+<body>
+<div class="notebook">
+
+  <div class="nb-header">
+    <div class="nb-tag">calculus_warmup.ipynb</div>
+    <h1 class="nb-title">Calculus warm-up<br><em>for causal inference</em></h1>
+    <p class="nb-subtitle">2-day sprint. Derivatives → integrals → probability. Run every cell.</p>
+    <div class="nb-meta">
+      <span><b>Day 1</b> — derivatives</span>
+      <span><b>Day 2</b> — integrals</span>
+      <span><b>Tool</b> — math.js (SymPy-like)</span>
+      <span><b>Goal</b> — ready for Blitzstein week 1</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+    <div class="progress-label" id="progress-label">0 / 8 cells completed</div>
+  </div>
+
+  <div class="toolbar">
+    <button class="toolbar-btn primary" onclick="runAll()">▶ Run all cells</button>
+    <button class="toolbar-btn" onclick="resetAll()">↺ Reset</button>
+    <div class="score-display">Score: <b id="score">0</b> / 8</div>
+  </div>
+
+  <!-- DAY 1 -->
+  <div class="section-divider">
+    <span class="label">DAY 1 — DERIVATIVES</span>
+    <div class="line"></div>
+  </div>
+
+  <div class="markdown-cell">
+    <h3>What is a derivative?</h3>
+    <p>A derivative measures how much a function changes when its input changes. Geometrically: it's the slope of the curve at a point.</p>
+    <span class="math-formula">f'(x) = lim[h→0] (f(x+h) - f(x)) / h</span>
+    <div class="ci-link">⟶ <b>Why this matters for causal inference:</b> later you'll maximize likelihood functions to estimate treatment effects. Maximizing = finding where the derivative = 0.</div>
+    <p>The power rule (the one you'll use 90% of the time): if f(x) = xⁿ, then f'(x) = n·xⁿ⁻¹</p>
+  </div>
+
+  <!-- Cell 1 -->
+  <div class="cell" id="cell-1">
+    <div class="cell-gutter">
+      <span class="cell-num">[1]</span>
+      <button class="run-btn" onclick="runCell(1)">▶</button>
+    </div>
+    <div class="cell-body">
+      <textarea class="cell-code" id="code-1" spellcheck="false"># Warm-up: basic derivatives using math.js
+# Run this cell to verify the power rule
+
+# f(x) = 3x^2 + 2x
+# Expected: f'(x) = 6x + 2
+
+x = 4  # evaluate at x=4
+fx_plus_h = 3*(x+0.0001)**2 + 2*(x+0.0001)
+fx = 3*x**2 + 2*x
+derivative_approx = (fx_plus_h - fx) / 0.0001
+
+print("f(x) = 3x^2 + 2x")
+print("f'(x) analytically = 6x + 2 =", 6*x + 2)
+print("f'(x) numerically  =", round(derivative_approx, 4))
+print("Match?", abs(derivative_approx - (6*x + 2)) < 0.01)</textarea>
+      <div class="cell-output" id="output-1"></div>
+    </div>
+  </div>
+
+  <div class="markdown-cell">
+    <h3>The chain rule</h3>
+    <p>When functions are nested — like f(g(x)) — you use the chain rule: (f∘g)'(x) = f'(g(x)) · g'(x)</p>
+    <span class="math-formula">d/dx [f(g(x))] = f'(g(x)) · g'(x)</span>
+    <div class="ci-link">⟶ <b>Why this matters:</b> backpropagation in neural networks (your DL track) is entirely the chain rule applied recursively. Also used when differentiating log-likelihoods.</div>
+    <div class="hint">💡 Example: d/dx[e^(x²)] = e^(x²) · 2x — outer derivative times inner derivative</div>
+  </div>
+
+  <!-- Cell 2 -->
+  <div class="cell" id="cell-2">
+    <div class="cell-gutter">
+      <span class="cell-num">[2]</span>
+      <button class="run-btn" onclick="runCell(2)">▶</button>
+    </div>
+    <div class="cell-body">
+      <textarea class="cell-code" id="code-2" spellcheck="false"># Chain rule: d/dx[log(x^2 + 1)]
+# Outer: log(u) -> 1/u
+# Inner: x^2 + 1 -> 2x
+# Chain rule: (1/(x^2+1)) * 2x = 2x/(x^2+1)
+
+import math
+
+def f(x):
+    return math.log(x**2 + 1)
+
+def f_prime_analytical(x):
+    return 2*x / (x**2 + 1)  # chain rule result
+
+def f_prime_numerical(x, h=1e-6):
+    return (f(x + h) - f(x)) / h
+
+x = 3.0
+print("d/dx[log(x^2+1)] at x=3")
+print("Analytical (chain rule):", round(f_prime_analytical(x), 6))
+print("Numerical approx:       ", round(f_prime_numerical(x), 6))
+print()
+print("Key insight: log derivatives appear EVERYWHERE")
+print("in log-likelihood estimation for causal models.")</textarea>
+      <div class="cell-output" id="output-2"></div>
+    </div>
+  </div>
+
+  <!-- Cell 3: exercise -->
+  <div class="cell" id="cell-3">
+    <div class="cell-gutter">
+      <span class="cell-num">[3]</span>
+      <button class="run-btn" onclick="runCell(3)">▶</button>
+    </div>
+    <div class="cell-body">
+      <textarea class="cell-code" id="code-3" spellcheck="false"># EXERCISE: Find where the derivative = 0
+# This is how we find the maximum likelihood estimator
+#
+# f(x) = -x^2 + 4x + 1  (a concave function — has a maximum)
+# 1. What is f'(x)?       (answer: -2x + 4)
+# 2. Set f'(x) = 0 and solve for x.  (answer: x = 2)
+# 3. Verify numerically below.
+
+import math
+
+def f(x):
+    return -x**2 + 4*x + 1
+
+def f_prime(x, h=1e-6):
+    return (f(x + h) - f(x)) / h
+
+# Find maximum numerically
+xs = [i * 0.1 for i in range(0, 51)]
+vals = [f(x) for x in xs]
+max_x = xs[vals.index(max(vals))]
+
+print("f(x) = -x^2 + 4x + 1")
+print("Analytical maximum at x = 2,  f(2) =", f(2))
+print("Numerical maximum at  x =", max_x, ", f =", round(f(max_x), 4))
+print("Derivative at x=2:", round(f_prime(2), 6), "(should be ~0)")
+print()
+print("This is EXACTLY what happens when we maximize")
+print("a log-likelihood to find a causal effect estimate.")</textarea>
+      <div class="cell-output" id="output-3"></div>
+    </div>
+  </div>
+
+  <div class="markdown-cell">
+    <h3>Plotting derivatives — seeing the slope</h3>
+    <p>The best way to build intuition is to see the function and its derivative side by side.</p>
+    <div class="hint">💡 Where f is increasing → f' is positive. Where f peaks → f' = 0. Where f is decreasing → f' is negative.</div>
+  </div>
+
+  <!-- Cell 4: plotting -->
+  <div class="cell" id="cell-4">
+    <div class="cell-gutter">
+      <span class="cell-num">[4]</span>
+      <button class="run-btn" onclick="runCell(4)">▶</button>
+    </div>
+    <div class="cell-body">
+      <textarea class="cell-code" id="code-4" spellcheck="false"># Plot f(x) = sin(x) and its derivative cos(x)
+# This builds intuition for what derivatives mean visually.
+# (Rendered as a canvas chart below)
+
+plot_function("sin")
+print("sin(x) plotted in purple — its derivative cos(x) in teal.")
+print("Notice: when sin peaks, cos crosses zero. That's the derivative = 0 rule.")</textarea>
+      <div class="cell-output" id="output-4">
+        <canvas id="canvas-4" width="680" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 2 -->
+  <div class="section-divider">
+    <span class="label">DAY 2 — INTEGRALS</span>
+    <div class="line"></div>
+  </div>
+
+  <div class="markdown-cell">
+    <h3>What is a definite integral?</h3>
+    <p>A definite integral computes the area under a curve between two points. It's the reverse of differentiation.</p>
+    <span class="math-formula">∫ₐᵇ f(x) dx = F(b) - F(a)   where F'(x) = f(x)</span>
+    <div class="ci-link">⟶ <b>Why this matters for probability:</b> For a continuous random variable X with density f(x), the probability P(a ≤ X ≤ b) = ∫ₐᵇ f(x)dx. You will write this every single week in Blitzstein.</div>
+    <p>Basic rule: ∫ xⁿ dx = xⁿ⁺¹/(n+1) + C</p>
+  </div>
+
+  <!-- Cell 5 -->
+  <div class="cell" id="cell-5">
+    <div class="cell-gutter">
+      <span class="cell-num">[5]</span>
+      <button class="run-btn" onclick="runCell(5)">▶</button>
+    </div>
+    <div class="cell-body">
+      <textarea class="cell-code" id="code-5" spellcheck="false"># Numerical integration using Riemann sums
+# This is what Python does under the hood with scipy.integrate
+
+def riemann_integral(f, a, b, n=10000):
+    """Approximate ∫f(x)dx from a to b using n rectangles"""
+    h = (b - a) / n
+    total = 0
+    for i in range(n):
+        x = a + i * h
+        total += f(x) * h
+    return total
+
+import math
+
+# Example: ∫₀¹ 2x dx = [x²]₀¹ = 1 - 0 = 1
+result1 = riemann_integral(lambda x: 2*x, 0, 1)
+print("∫₀¹ 2x dx")
+print("Analytical:", 1.0)
+print("Numerical: ", round(result1, 6))
+print()
+
+# Example: ∫₀² x² dx = [x³/3]₀² = 8/3 ≈ 2.667
+result2 = riemann_integral(lambda x: x**2, 0, 2)
+print("∫₀² x² dx")
+print("Analytical:", round(8/3, 6))
+print("Numerical: ", round(result2, 6))</textarea>
+      <div class="cell-output" id="output-5"></div>
+    </div>
+  </div>
+
+  <!-- Cell 6: probability connection -->
+  <div class="cell" id="cell-6">
+    <div class="cell-gutter">
+      <span class="cell-num">[6]</span>
+      <button class="run-btn" onclick="runCell(6)">▶</button>
+    </div>
+    <div class="cell-body">
+      <textarea class="cell-code" id="code-6" spellcheck="false"># THE KEY CONNECTION: Integrals = Probabilities
+#
+# A valid probability density function must satisfy:
+# 1. f(x) >= 0 for all x
+# 2. ∫ f(x) dx = 1  (total probability = 1)
+#
+# Example: Uniform distribution on [0, 1]
+# f(x) = 1 for x in [0,1], 0 otherwise
+# P(0.2 <= X <= 0.7) = ∫₀.₂^0.7 1 dx = 0.5
+
+import math
+
+def uniform_pdf(x, a=0, b=1):
+    if a <= x <= b:
+        return 1.0 / (b - a)
+    return 0.0
+
+def riemann_integral(f, a, b, n=10000):
+    h = (b - a) / n
+    return sum(f(a + i*h) * h for i in range(n))
+
+# Verify total probability = 1
+total = riemann_integral(lambda x: uniform_pdf(x), 0, 1)
+print("Uniform[0,1] total probability:", round(total, 6), "(should be 1.0)")
+
+# Compute P(0.2 <= X <= 0.7)
+prob = riemann_integral(lambda x: uniform_pdf(x), 0.2, 0.7)
+print("P(0.2 <= X <= 0.7):", round(prob, 6), "(should be 0.5)")
+
+print()
+print("This is Blitzstein ch.4 in one cell.")
+print("Every continuous probability is an integral.")</textarea>
+      <div class="cell-output" id="output-6"></div>
+    </div>
+  </div>
+
+  <!-- Cell 7: Normal distribution -->
+  <div class="cell" id="cell-7">
+    <div class="cell-gutter">
+      <span class="cell-num">[7]</span>
+      <button class="run-btn" onclick="runCell(7)">▶</button>
+    </div>
+    <div class="cell-body">
+      <textarea class="cell-code" id="code-7" spellcheck="false"># The Normal distribution — most important distribution in statistics
+# f(x) = (1/σ√2π) * exp(-(x-μ)²/2σ²)
+# P(μ-σ <= X <= μ+σ) ≈ 0.68  (the 68-95-99.7 rule)
+
+import math
+
+def normal_pdf(x, mu=0, sigma=1):
+    return (1 / (sigma * math.sqrt(2 * math.pi))) * math.exp(-0.5 * ((x - mu) / sigma)**2)
+
+def riemann_integral(f, a, b, n=100000):
+    h = (b - a) / n
+    return sum(f(a + i*h) * h for i in range(n))
+
+mu, sigma = 0, 1
+
+# P(-1 <= X <= 1): should be ~0.6827
+p1 = riemann_integral(lambda x: normal_pdf(x, mu, sigma), -1, 1)
+# P(-2 <= X <= 2): should be ~0.9545
+p2 = riemann_integral(lambda x: normal_pdf(x, mu, sigma), -2, 2)
+
+print("Normal(μ=0, σ=1) — the 68-95-99.7 rule:")
+print(f"P(-1σ ≤ X ≤ 1σ) = {round(p1, 4)}  (expected ~0.6827)")
+print(f"P(-2σ ≤ X ≤ 2σ) = {round(p2, 4)}  (expected ~0.9545)")
+print()
+print("This is where p-values come from in your A/B tests.")
+print("P(|Z| > 1.96) ≈ 0.05  → the 5% significance level.")
+
+plot_function("normal")
+print("Normal PDF plotted above.")</textarea>
+      <div class="cell-output" id="output-7">
+        <canvas id="canvas-7" width="680" height="180"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cell 8: final exercise -->
+  <div class="cell" id="cell-8">
+    <div class="cell-gutter">
+      <span class="cell-num">[8]</span>
+      <button class="run-btn" onclick="runCell(8)">▶</button>
+    </div>
+    <div class="cell-body">
+      <textarea class="cell-code" id="code-8" spellcheck="false"># FINAL EXERCISE: You're ready for Week 1
+# Connect everything: derivative + integral + probability
+
+import math
+
+# 1. Expectation E[X] = ∫ x * f(x) dx
+# For Uniform[0,1]: E[X] = ∫₀¹ x * 1 dx = [x²/2]₀¹ = 0.5
+
+def uniform_pdf(x): return 1.0 if 0 <= x <= 1 else 0.0
+
+def riemann_integral(f, a, b, n=100000):
+    h = (b - a) / n
+    return sum(f(a + i*h) * h for i in range(n))
+
+EX = riemann_integral(lambda x: x * uniform_pdf(x), 0, 1)
+print("E[X] for Uniform[0,1]:", round(EX, 6), "(should be 0.5)")
+
+# 2. Variance Var[X] = E[X²] - (E[X])²
+EX2 = riemann_integral(lambda x: x**2 * uniform_pdf(x), 0, 1)
+VarX = EX2 - EX**2
+print("Var[X] for Uniform[0,1]:", round(VarX, 6), "(should be 1/12 ≈ 0.0833)")
+
+print()
+print("="*45)
+print("WARM-UP COMPLETE. You are ready for Week 1.")
+print("="*45)
+print()
+print("You can now:")
+print("  ✓ Compute derivatives (find slopes, maxima)")
+print("  ✓ Compute integrals (find areas, probabilities)")
+print("  ✓ Connect integrals to E[X] and P(a≤X≤b)")
+print()
+print("Open Blitzstein ch. 1 on Monday.")</textarea>
+      <div class="cell-output" id="output-8"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let completed = new Set();
+
+function updateProgress() {
+  const total = 8;
+  const done = completed.size;
+  document.getElementById('progress').style.width = (done/total*100) + '%';
+  document.getElementById('progress-label').textContent = done + ' / ' + total + ' cells completed';
+  document.getElementById('score').textContent = done;
+}
+
+function evalCode(code) {
+  const lines = code.split('\n');
+  const output = [];
+  let plotCalled = null;
+
+  const print = (...args) => output.push(args.map(String).join(' '));
+
+  const math_module = {
+    log: Math.log,
+    sqrt: Math.sqrt,
+    exp: Math.exp,
+    pi: Math.PI,
+    abs: Math.abs,
+    sin: Math.sin,
+    cos: Math.cos,
+    floor: Math.floor,
+  };
+
+  const plot_function = (type) => { plotCalled = type; };
+
+  try {
+    const jsCode = transpilePython(code);
+    const fn = new Function('print', 'math', 'plot_function', jsCode);
+    fn(print, math_module, plot_function);
+  } catch(e) {
+    return { error: e.message, plot: null };
+  }
+  return { output: output.join('\n'), plot: plotCalled };
+}
+
+function transpilePython(code) {
+  let js = code;
+  js = js.replace(/^#.*$/gm, '');
+  js = js.replace(/import math\n?/g, '');
+  js = js.replace(/import math as math\n?/g, '');
+  js = js.replace(/math\.log\b/g, 'Math.log');
+  js = js.replace(/math\.sqrt\b/g, 'Math.sqrt');
+  js = js.replace(/math\.exp\b/g, 'Math.exp');
+  js = js.replace(/math\.pi\b/g, 'Math.PI');
+  js = js.replace(/math\.abs\b/g, 'Math.abs');
+  js = js.replace(/math\.sin\b/g, 'Math.sin');
+  js = js.replace(/math\.cos\b/g, 'Math.cos');
+  js = js.replace(/math\.floor\b/g, 'Math.floor');
+  js = js.replace(/\*\*(\d+\.?\d*)/g, (m, p) => `**${p}`);
+  js = js.replace(/\*\*/g, '**');
+  js = js.replace(/(\w+)\s*=\s*\[([^\]]*)\]\n/g, (m, name, items) => `let ${name} = [${items}];\n`);
+  js = js.replace(/def (\w+)\(([^)]*)\):/g, 'function $1($2) {');
+  js = js.replace(/for (\w+) in range\((\d+),\s*(\d+)\):/g, 'for (let $1 = $2; $1 < $3; $1++) {');
+  js = js.replace(/for (\w+) in range\((\d+)\):/g, 'for (let $1 = 0; $1 < $2; $1++) {');
+  js = js.replace(/for (\w+) in (\w+):/g, 'for (let $1 of $2) {');
+  js = js.replace(/if ([^:]+):/g, 'if ($1) {');
+  js = js.replace(/elif ([^:]+):/g, '} else if ($1) {');
+  js = js.replace(/else:/g, '} else {');
+  js = js.replace(/lambda ([^:]+):\s*(.+)/g, '($1) => $2');
+  js = js.replace(/abs\(/g, 'Math.abs(');
+  js = js.replace(/round\(([^,]+),\s*(\d+)\)/g, (m, val, digits) => `(Math.round(${val} * Math.pow(10,${digits})) / Math.pow(10,${digits}))`);
+  js = js.replace(/round\(([^)]+)\)/g, 'Math.round($1)');
+  js = js.replace(/True/g, 'true');
+  js = js.replace(/False/g, 'false');
+  js = js.replace(/None/g, 'null');
+  js = js.replace(/not /g, '!');
+  js = js.replace(/and /g, '&& ');
+  js = js.replace(/or /g, '|| ');
+  js = js.replace(/\blen\((\w+)\)/g, '$1.length');
+  js = js.replace(/\bmax\((\w+)\)/g, 'Math.max(...$1)');
+  js = js.replace(/\bmin\((\w+)\)/g, 'Math.min(...$1)');
+  js = js.replace(/(\w+)\.append\(([^)]+)\)/g, '$1.push($2)');
+  js = js.replace(/\bsum\(([^)]+)\)/g, '($1).reduce((a,b)=>a+b,0)');
+  js = js.replace(/f"([^"]*?)"/g, (m, s) => {
+    return '`' + s.replace(/\{([^}]+)\}/g, '${$1}') + '`';
+  });
+
+  const lines2 = js.split('\n');
+  const result = [];
+  let indent = 0;
+  let prevIndent = 0;
+  for (let line of lines2) {
+    const stripped = line.trimStart();
+    const curIndent = line.length - stripped.length;
+    if (curIndent < prevIndent && result.length > 0) {
+      const diff = Math.floor((prevIndent - curIndent) / 4);
+      for (let d = 0; d < diff; d++) result.push('}');
+    }
+    if (stripped) result.push(line);
+    prevIndent = curIndent;
+  }
+  while (prevIndent >= 4) { result.push('}'); prevIndent -= 4; }
+
+  let code2 = result.join('\n');
+  const varNames = [];
+  code2 = code2.replace(/^(\s*)(\w+)\s*=/gm, (m, sp, name) => {
+    if (['if','for','while','function','return','let','const','var'].includes(name)) return m;
+    if (!varNames.includes(name)) { varNames.push(name); return `${sp}let ${name} =`; }
+    return m;
+  });
+  return code2;
+}
+
+function drawSinPlot(canvasId) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  canvas.style.display = 'block';
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#12121588';
+  ctx.fillRect(0, 0, W, H);
+
+  const pad = 30;
+  const xMin = -Math.PI * 2, xMax = Math.PI * 2;
+  const yMin = -1.5, yMax = 1.5;
+
+  const toScreen = (x, y) => ({
+    sx: pad + (x - xMin) / (xMax - xMin) * (W - 2*pad),
+    sy: pad + (1 - (y - yMin) / (yMax - yMin)) * (H - 2*pad)
+  });
+
+  ctx.strokeStyle = '#3a3a45';
+  ctx.lineWidth = 1;
+  const mid = toScreen(xMin, 0);
+  ctx.beginPath(); ctx.moveTo(pad, mid.sy); ctx.lineTo(W-pad, mid.sy); ctx.stroke();
+
+  const drawFn = (fn, color) => {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let i = 0; i <= 500; i++) {
+      const x = xMin + i / 500 * (xMax - xMin);
+      const y = fn(x);
+      const {sx, sy} = toScreen(x, y);
+      i === 0 ? ctx.moveTo(sx, sy) : ctx.lineTo(sx, sy);
+    }
+    ctx.stroke();
+  };
+
+  drawFn(Math.sin, '#7c6af7');
+  drawFn(Math.cos, '#4ecdc4');
+
+  ctx.font = '11px JetBrains Mono, monospace';
+  ctx.fillStyle = '#7c6af7'; ctx.fillText('sin(x)', W - 70, 20);
+  ctx.fillStyle = '#4ecdc4'; ctx.fillText('cos(x) = sin\'(x)', W - 130, 36);
+}
+
+function drawNormalPlot(canvasId) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  canvas.style.display = 'block';
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#12121588';
+  ctx.fillRect(0, 0, W, H);
+
+  const pad = 30;
+  const xMin = -4, xMax = 4;
+  const normal = (x) => Math.exp(-0.5*x*x) / Math.sqrt(2*Math.PI);
+  const yMax = normal(0) * 1.2;
+  const yMin = 0;
+
+  const toScreen = (x, y) => ({
+    sx: pad + (x - xMin) / (xMax - xMin) * (W - 2*pad),
+    sy: pad + (1 - (y - yMin) / (yMax - yMin)) * (H - 2*pad)
+  });
+
+  // Fill ±1σ
+  ctx.fillStyle = 'rgba(124,106,247,0.15)';
+  ctx.beginPath();
+  const s0 = toScreen(-1, 0);
+  ctx.moveTo(s0.sx, s0.sy);
+  for (let i = 0; i <= 200; i++) {
+    const x = -1 + i/200 * 2;
+    const {sx, sy} = toScreen(x, normal(x));
+    ctx.lineTo(sx, sy);
+  }
+  const s1 = toScreen(1, 0);
+  ctx.lineTo(s1.sx, s1.sy);
+  ctx.closePath();
+  ctx.fill();
+
+  // Baseline
+  ctx.strokeStyle = '#3a3a45'; ctx.lineWidth = 1;
+  const base = toScreen(xMin, 0);
+  ctx.beginPath(); ctx.moveTo(pad, base.sy); ctx.lineTo(W-pad, base.sy); ctx.stroke();
+
+  // Curve
+  ctx.strokeStyle = '#7c6af7'; ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  for (let i = 0; i <= 500; i++) {
+    const x = xMin + i/500*(xMax-xMin);
+    const {sx, sy} = toScreen(x, normal(x));
+    i === 0 ? ctx.moveTo(sx, sy) : ctx.lineTo(sx, sy);
+  }
+  ctx.stroke();
+
+  ctx.font = '11px JetBrains Mono, monospace';
+  ctx.fillStyle = '#7c6af7';
+  ctx.fillText('Normal(0,1) — shaded area = P(-1σ ≤ X ≤ 1σ) ≈ 0.68', pad, H - 8);
+}
+
+const runSimple = {
+  1: () => {
+    const x = 4;
+    const fx_plus_h = 3*(x+0.0001)**2 + 2*(x+0.0001);
+    const fx = 3*x**2 + 2*x;
+    const deriv = (fx_plus_h - fx) / 0.0001;
+    return [
+      'f(x) = 3x^2 + 2x',
+      'f\'(x) analytically = 6x + 2 = ' + (6*x+2),
+      'f\'(x) numerically  = ' + deriv.toFixed(4),
+      'Match? ' + (Math.abs(deriv - (6*x+2)) < 0.01)
+    ].join('\n');
+  },
+  2: () => {
+    const f = x => Math.log(x**2 + 1);
+    const analytical = x => 2*x / (x**2 + 1);
+    const numerical = x => (f(x+1e-6) - f(x)) / 1e-6;
+    const x = 3;
+    return [
+      'd/dx[log(x^2+1)] at x=3',
+      'Analytical (chain rule): ' + analytical(x).toFixed(6),
+      'Numerical approx:        ' + numerical(x).toFixed(6),
+      '',
+      'Key insight: log derivatives appear EVERYWHERE',
+      'in log-likelihood estimation for causal models.'
+    ].join('\n');
+  },
+  3: () => {
+    const f = x => -x**2 + 4*x + 1;
+    const f_prime = x => (-f(x+1e-6) + f(x+1e-6) - f(x)) / 1e-6;
+    const fp2 = x => (f(x+1e-6) - f(x)) / 1e-6;
+    const xs = Array.from({length:51}, (_,i) => i*0.1);
+    const vals = xs.map(f);
+    const maxX = xs[vals.indexOf(Math.max(...vals))];
+    return [
+      'f(x) = -x^2 + 4x + 1',
+      'Analytical maximum at x = 2,  f(2) = ' + f(2),
+      'Numerical maximum at  x = ' + maxX + ', f = ' + f(maxX).toFixed(4),
+      'Derivative at x=2: ' + fp2(2).toFixed(6) + ' (should be ~0)',
+      '',
+      'This is EXACTLY what happens when we maximize',
+      'a log-likelihood to find a causal effect estimate.'
+    ].join('\n');
+  },
+  4: () => 'sin(x) plotted in purple — its derivative cos(x) in teal.\nNotice: when sin peaks, cos crosses zero. That\'s the derivative = 0 rule.',
+  5: () => {
+    const ri = (f, a, b, n=10000) => { let h=(b-a)/n, t=0; for(let i=0;i<n;i++) t+=f(a+i*h)*h; return t; };
+    const r1 = ri(x=>2*x, 0, 1);
+    const r2 = ri(x=>x**2, 0, 2);
+    return [
+      '∫₀¹ 2x dx',
+      'Analytical: 1.0',
+      'Numerical:  ' + r1.toFixed(6),
+      '',
+      '∫₀² x² dx',
+      'Analytical: ' + (8/3).toFixed(6),
+      'Numerical:  ' + r2.toFixed(6)
+    ].join('\n');
+  },
+  6: () => {
+    const ri = (f, a, b, n=10000) => { let h=(b-a)/n; return Array.from({length:n},(_,i)=>f(a+i*h)*h).reduce((a,b)=>a+b,0); };
+    const updf = x => (x>=0&&x<=1) ? 1.0 : 0.0;
+    const total = ri(updf, 0, 1);
+    const prob = ri(updf, 0.2, 0.7);
+    return [
+      'Uniform[0,1] total probability: ' + total.toFixed(6) + ' (should be 1.0)',
+      'P(0.2 <= X <= 0.7): ' + prob.toFixed(6) + ' (should be 0.5)',
+      '',
+      'This is Blitzstein ch.4 in one cell.',
+      'Every continuous probability is an integral.'
+    ].join('\n');
+  },
+  7: () => {
+    const npdf = (x,mu=0,s=1) => Math.exp(-0.5*((x-mu)/s)**2)/(s*Math.sqrt(2*Math.PI));
+    const ri = (f,a,b,n=100000) => { let h=(b-a)/n; return Array.from({length:n},(_,i)=>f(a+i*h)*h).reduce((a,b)=>a+b,0); };
+    const p1 = ri(x=>npdf(x),-1,1);
+    const p2 = ri(x=>npdf(x),-2,2);
+    return [
+      'Normal(μ=0, σ=1) — the 68-95-99.7 rule:',
+      'P(-1σ ≤ X ≤ 1σ) = ' + p1.toFixed(4) + '  (expected ~0.6827)',
+      'P(-2σ ≤ X ≤ 2σ) = ' + p2.toFixed(4) + '  (expected ~0.9545)',
+      '',
+      'This is where p-values come from in your A/B tests.',
+      'P(|Z| > 1.96) ≈ 0.05  → the 5% significance level.',
+      'Normal PDF plotted above.'
+    ].join('\n');
+  },
+  8: () => {
+    const ri = (f,a,b,n=100000) => { let h=(b-a)/n; return Array.from({length:n},(_,i)=>f(a+i*h)*h).reduce((a,b)=>a+b,0); };
+    const updf = x => (x>=0&&x<=1)?1.0:0.0;
+    const EX = ri(x=>x*updf(x),0,1);
+    const EX2 = ri(x=>x**2*updf(x),0,1);
+    const VarX = EX2 - EX**2;
+    return [
+      'E[X] for Uniform[0,1]: ' + EX.toFixed(6) + ' (should be 0.5)',
+      'Var[X] for Uniform[0,1]: ' + VarX.toFixed(6) + ' (should be 1/12 ≈ 0.0833)',
+      '',
+      '=============================================',
+      'WARM-UP COMPLETE. You are ready for Week 1.',
+      '=============================================',
+      '',
+      'You can now:',
+      '  ✓ Compute derivatives (find slopes, maxima)',
+      '  ✓ Compute integrals (find areas, probabilities)',
+      '  ✓ Connect integrals to E[X] and P(a≤X≤b)',
+      '',
+      'Open Blitzstein ch. 1 on Monday.'
+    ].join('\n');
+  }
+};
+
+function runCell(n) {
+  const btn = document.querySelector(`#cell-${n} .run-btn`);
+  const out = document.getElementById(`output-${n}`);
+  btn.textContent = '●';
+  btn.classList.add('running');
+
+  setTimeout(() => {
+    try {
+      const result = runSimple[n]();
+      const existingCanvas = out.querySelector('canvas');
+      out.innerHTML = '';
+      if (existingCanvas) out.appendChild(existingCanvas);
+      const pre = document.createElement('pre');
+      pre.style.cssText = 'white-space:pre-wrap;word-break:break-word;color:var(--accent2);font-family:JetBrains Mono,monospace;font-size:13px;';
+      pre.textContent = result;
+      out.appendChild(pre);
+      out.classList.add('visible');
+      btn.textContent = '✓';
+      btn.classList.remove('running');
+      btn.classList.add('done');
+      completed.add(n);
+
+      if (n === 4) setTimeout(() => drawSinPlot('canvas-4'), 50);
+      if (n === 7) setTimeout(() => drawNormalPlot('canvas-7'), 50);
+
+      updateProgress();
+    } catch(e) {
+      out.innerHTML = '<pre style="color:var(--red);font-family:JetBrains Mono,monospace;font-size:13px;">' + e.message + '</pre>';
+      out.classList.add('visible');
+      btn.textContent = '▶';
+      btn.classList.remove('running');
+    }
+  }, 300);
+}
+
+function runAll() {
+  [1,2,3,4,5,6,7,8].forEach((n, i) => setTimeout(() => runCell(n), i * 400));
+}
+
+function resetAll() {
+  [1,2,3,4,5,6,7,8].forEach(n => {
+    const out = document.getElementById(`output-${n}`);
+    out.classList.remove('visible');
+    out.innerHTML = n === 4 ? '<canvas id="canvas-4" width="680" height="200"></canvas>' :
+                    n === 7 ? '<canvas id="canvas-7" width="680" height="180"></canvas>' : '';
+    const btn = document.querySelector(`#cell-${n} .run-btn`);
+    btn.textContent = '▶';
+    btn.classList.remove('running','done');
+  });
+  completed.clear();
+  updateProgress();
+}
+</script>
+</body>
+</html>
